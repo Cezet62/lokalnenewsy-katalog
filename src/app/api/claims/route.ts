@@ -25,11 +25,13 @@ export async function POST(request: Request) {
     }
 
     // Check if company exists
-    const { data: company, error: companyError } = await supabase
+    const { data: companyData, error: companyError } = await supabase
       .from('companies')
       .select('id, is_claimed')
       .eq('id', company_id)
-      .single<{ id: string; is_claimed: boolean }>()
+      .single()
+
+    const company = companyData as { id: string; is_claimed: boolean } | null
 
     if (companyError || !company) {
       return NextResponse.json(
