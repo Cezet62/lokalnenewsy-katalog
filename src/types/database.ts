@@ -203,3 +203,24 @@ export type Event = {
   created_at: string
   updated_at: string
 }
+
+// Typ ogłoszenia
+export type Classified = {
+  id: string
+  title: string
+  description: string
+  category: 'sprzedam' | 'kupie' | 'uslugi' | 'praca' | 'oddam' | 'inne'
+  price: number | null
+  price_type: 'fixed' | 'negotiable' | 'free' | 'per_hour'
+  location: string
+  contact_name: string
+  contact_phone: string | null
+  contact_email: string | null
+  image_url: string | null
+  status: 'pending' | 'active' | 'sold' | 'expired' | 'rejected'
+  is_featured: boolean
+  views: number
+  expires_at: string
+  created_at: string
+  updated_at: string
+}

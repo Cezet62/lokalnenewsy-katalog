@@ -8,27 +8,27 @@ interface Stats {
   articles: number
   events: number
   companies: number
-  claims: number
+  classifieds: number
 }
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<Stats>({ articles: 0, events: 0, companies: 0, claims: 0 })
+  const [stats, setStats] = useState<Stats>({ articles: 0, events: 0, companies: 0, classifieds: 0 })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchStats = async () => {
-      const [articlesRes, eventsRes, companiesRes, claimsRes] = await Promise.all([
+      const [articlesRes, eventsRes, companiesRes, classifiedsRes] = await Promise.all([
         supabaseBrowser.from('articles').select('id', { count: 'exact', head: true }),
         supabaseBrowser.from('events').select('id', { count: 'exact', head: true }),
         supabaseBrowser.from('companies').select('id', { count: 'exact', head: true }),
-        supabaseBrowser.from('claims').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabaseBrowser.from('classifieds').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
       ])
 
       setStats({
         articles: articlesRes.count || 0,
         events: eventsRes.count || 0,
         companies: companiesRes.count || 0,
-        claims: claimsRes.count || 0,
+        classifieds: classifiedsRes.count || 0,
       })
       setLoading(false)
     }
@@ -40,7 +40,7 @@ export default function AdminDashboard() {
     { label: 'Artykuły', value: stats.articles, href: '/admin/artykuly', color: 'blue', icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z' },
     { label: 'Wydarzenia', value: stats.events, href: '/admin/wydarzenia', color: 'purple', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
     { label: 'Firmy', value: stats.companies, href: '/admin/firmy', color: 'green', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
-    { label: 'Zgłoszenia', value: stats.claims, href: '/admin/firmy', color: 'yellow', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' },
+    { label: 'Ogłoszenia (nowe)', value: stats.classifieds, href: '/admin/ogloszenia', color: 'yellow', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
   ]
 
   const colorClasses: Record<string, { bg: string; text: string; iconBg: string }> = {
