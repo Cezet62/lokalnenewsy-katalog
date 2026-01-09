@@ -70,7 +70,7 @@ export async function POST(request: Request) {
       phone: phone || null,
       message: message || null,
       status: 'pending',
-    })
+    } as never)
 
     if (insertError) {
       console.error('Error creating claim:', insertError)
