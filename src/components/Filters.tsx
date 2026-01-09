@@ -24,7 +24,7 @@ export default function Filters({ categories, locations }: FiltersProps) {
       params.delete(key)
     }
 
-    router.push(`/?${params.toString()}`)
+    router.push(`/firmy?${params.toString()}`)
   }
 
   return (

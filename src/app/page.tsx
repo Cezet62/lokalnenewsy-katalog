@@ -1,97 +1,56 @@
-import { Suspense } from 'react'
-import Hero from '@/components/Hero'
-import Filters from '@/components/Filters'
-import CompanyGrid from '@/components/CompanyGrid'
+import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import type { CompanyWithRelations, Category, Location } from '@/types/database'
+import WeatherWidget from '@/components/WeatherWidget'
+import ArticleCard from '@/components/ArticleCard'
+import CompanyCard from '@/components/CompanyCard'
+import NewsletterForm from '@/components/NewsletterForm'
+import type { Article, CompanyWithRelations } from '@/types/database'
 
-interface PageProps {
-  searchParams: Promise<{
-    kategoria?: string
-    miejscowosc?: string
-    szukaj?: string
-  }>
-}
-
-async function getCategories(): Promise<Category[]> {
+async function getFeaturedArticle(): Promise<Article | null> {
   const { data, error } = await supabase
-    .from('categories')
+    .from('articles')
     .select('*')
-    .order('sort_order')
+    .eq('is_published', true)
+    .eq('is_featured', true)
+    .order('published_at', { ascending: false })
+    .limit(1)
+    .single()
 
   if (error) {
-    console.error('Error fetching categories:', error)
+    console.error('Error fetching featured article:', error)
+    return null
+  }
+
+  return data as Article
+}
+
+async function getLatestArticles(): Promise<Article[]> {
+  const { data, error } = await supabase
+    .from('articles')
+    .select('*')
+    .eq('is_published', true)
+    .eq('is_featured', false)
+    .order('published_at', { ascending: false })
+    .limit(4)
+
+  if (error) {
+    console.error('Error fetching articles:', error)
     return []
   }
 
-  return data || []
+  return (data as Article[]) || []
 }
 
-async function getLocations(): Promise<Location[]> {
+async function getFeaturedCompanies(): Promise<CompanyWithRelations[]> {
   const { data, error } = await supabase
-    .from('locations')
-    .select('*')
-    .order('sort_order')
-
-  if (error) {
-    console.error('Error fetching locations:', error)
-    return []
-  }
-
-  return data || []
-}
-
-async function getCompanies(
-  categorySlug?: string,
-  locationSlug?: string,
-  searchQuery?: string
-): Promise<CompanyWithRelations[]> {
-  // Get category ID if filtered
-  let categoryId: string | null = null
-  if (categorySlug) {
-    const { data: category } = await supabase
-      .from('categories')
-      .select('id')
-      .eq('slug', categorySlug)
-      .single()
-    categoryId = (category as { id: string } | null)?.id ?? null
-  }
-
-  // Get location ID if filtered
-  let locationId: string | null = null
-  if (locationSlug) {
-    const { data: location } = await supabase
-      .from('locations')
-      .select('id')
-      .eq('slug', locationSlug)
-      .single()
-    locationId = (location as { id: string } | null)?.id ?? null
-  }
-
-  // Build query with all filters
-  let query = supabase
     .from('companies')
     .select(`
       *,
       categories (*),
       locations (*)
     `)
-    .order('is_featured', { ascending: false })
-    .order('name')
-
-  if (categoryId) {
-    query = query.eq('category_id', categoryId)
-  }
-
-  if (locationId) {
-    query = query.eq('location_id', locationId)
-  }
-
-  if (searchQuery) {
-    query = query.ilike('name', `%${searchQuery}%`)
-  }
-
-  const { data, error } = await query
+    .eq('is_featured', true)
+    .limit(3)
 
   if (error) {
     console.error('Error fetching companies:', error)
@@ -101,53 +60,175 @@ async function getCompanies(
   return (data as CompanyWithRelations[]) || []
 }
 
-function FiltersWrapper({
-  categories,
-  locations,
-}: {
-  categories: Category[]
-  locations: Location[]
-}) {
-  return (
-    <Suspense fallback={<div className="h-20 bg-white border-b border-gray-200" />}>
-      <Filters categories={categories} locations={locations} />
-    </Suspense>
-  )
-}
-
-export default async function HomePage({ searchParams }: PageProps) {
-  const params = await searchParams
-  const [categories, locations, companies] = await Promise.all([
-    getCategories(),
-    getLocations(),
-    getCompanies(params.kategoria, params.miejscowosc, params.szukaj),
+export default async function HomePage() {
+  const [featuredArticle, latestArticles, featuredCompanies] = await Promise.all([
+    getFeaturedArticle(),
+    getLatestArticles(),
+    getFeaturedCompanies(),
   ])
 
   return (
-    <>
-      <Hero />
-      <FiltersWrapper categories={categories} locations={locations} />
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <section className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Featured Article */}
+            <div className="lg:col-span-2">
+              {featuredArticle ? (
+                <ArticleCard article={featuredArticle} featured />
+              ) : (
+                <div className="bg-gray-100 rounded-xl h-64 flex items-center justify-center">
+                  <p className="text-gray-500">Brak wyróżnionego artykułu</p>
+                </div>
+              )}
+            </div>
 
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Results count */}
-        <div className="mb-6">
-          <p className="text-sm text-gray-500">
-            {companies.length === 0
-              ? 'Brak wyników'
-              : companies.length === 1
-              ? '1 firma'
-              : `${companies.length} firm`}
-            {params.szukaj && (
-              <span>
-                {' '}
-                dla &quot;{params.szukaj}&quot;
-              </span>
-            )}
-          </p>
+            {/* Sidebar */}
+            <div className="space-y-6">
+              {/* Weather */}
+              <WeatherWidget />
+
+              {/* Quick Links */}
+              <div className="bg-white rounded-xl border border-gray-200 p-4">
+                <h3 className="font-semibold text-gray-900 mb-3">Szybkie linki</h3>
+                <div className="space-y-2">
+                  <a
+                    href="https://www.bip.osielsko.pl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600"
+                  >
+                    <span>🏛️</span> Urząd Gminy Osielsko
+                  </a>
+                  <a
+                    href="tel:112"
+                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600"
+                  >
+                    <span>🚨</span> Telefon alarmowy: 112
+                  </a>
+                  <Link
+                    href="/firmy"
+                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600"
+                  >
+                    <span>🏢</span> Katalog firm
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-
-        <CompanyGrid companies={companies} />
       </section>
-    </>
+
+      {/* Latest Articles */}
+      <section className="py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">Najnowsze aktualności</h2>
+            <Link
+              href="/aktualnosci"
+              className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+            >
+              Zobacz wszystkie →
+            </Link>
+          </div>
+
+          {latestArticles.length > 0 ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {latestArticles.map((article) => (
+                <ArticleCard key={article.id} article={article} />
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+              <p className="text-gray-500">Brak artykułów do wyświetlenia</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Featured Companies */}
+      <section className="py-12 bg-white border-y border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">Polecane firmy</h2>
+            <Link
+              href="/firmy"
+              className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+            >
+              Zobacz katalog →
+            </Link>
+          </div>
+
+          {featuredCompanies.length > 0 ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredCompanies.map((company) => (
+                <CompanyCard key={company.id} company={company} />
+              ))}
+            </div>
+          ) : (
+            <div className="bg-gray-50 rounded-xl border border-gray-200 p-8 text-center">
+              <p className="text-gray-500">Brak wyróżnionych firm</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Newsletter */}
+      <section className="py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 md:p-12 text-center">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+              Bądź na bieżąco z tym, co dzieje się w gminie
+            </h2>
+            <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
+              Zapisz się na nasz tygodniowy newsletter i otrzymuj najważniejsze informacje
+              prosto na swoją skrzynkę email.
+            </p>
+            <div className="max-w-md mx-auto">
+              <NewsletterForm />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Info Section */}
+      <section className="py-12 bg-white border-t border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* About */}
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-3">O portalu</h3>
+              <p className="text-sm text-gray-600">
+                lokalnenewsy.pl to portal informacyjny gminy Osielsko. Dostarczamy najświeższe
+                wiadomości, informacje o wydarzeniach i katalog lokalnych firm.
+              </p>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-3">Kontakt</h3>
+              <p className="text-sm text-gray-600">
+                Masz newsa lub chcesz dodać swoją firmę?<br />
+                Napisz do nas: <a href="mailto:kontakt@lokalnenewsy.pl" className="text-blue-600 hover:underline">kontakt@lokalnenewsy.pl</a>
+              </p>
+            </div>
+
+            {/* Social */}
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-3">Obserwuj nas</h3>
+              <div className="flex gap-4">
+                <a href="#" className="text-gray-400 hover:text-blue-600">
+                  <span className="sr-only">Facebook</span>
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
   )
 }

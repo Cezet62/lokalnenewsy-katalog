@@ -9,7 +9,7 @@ interface CompanyCardProps {
 export default function CompanyCard({ company }: CompanyCardProps) {
   return (
     <Link
-      href={`/firma/${company.slug}`}
+      href={`/firmy/${company.slug}`}
       className="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg hover:border-blue-200 transition-all duration-200"
     >
       {/* Image */}

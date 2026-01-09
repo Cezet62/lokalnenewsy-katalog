@@ -162,3 +162,21 @@ export type CompanyWithRelations = Company & {
   categories: Category | null
   locations: Location | null
 }
+
+// Typ artykułu/newsa
+export type Article = {
+  id: string
+  title: string
+  slug: string
+  excerpt: string
+  content: string
+  image_url: string | null
+  category: string
+  is_featured: boolean
+  is_published: boolean
+  author: string
+  views: number
+  published_at: string
+  created_at: string
+  updated_at: string
+}
