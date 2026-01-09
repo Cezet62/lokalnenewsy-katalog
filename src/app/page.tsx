@@ -54,7 +54,7 @@ async function getCompanies(
       .select('id')
       .eq('slug', categorySlug)
       .single()
-    categoryId = category?.id ?? null
+    categoryId = (category as { id: string } | null)?.id ?? null
   }
 
   // Get location ID if filtered
@@ -65,7 +65,7 @@ async function getCompanies(
       .select('id')
       .eq('slug', locationSlug)
       .single()
-    locationId = location?.id ?? null
+    locationId = (location as { id: string } | null)?.id ?? null
   }
 
   // Build query with all filters
