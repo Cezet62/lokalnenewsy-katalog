@@ -1,65 +1,153 @@
-import Image from "next/image";
+import { Suspense } from 'react'
+import Hero from '@/components/Hero'
+import Filters from '@/components/Filters'
+import CompanyGrid from '@/components/CompanyGrid'
+import { supabase } from '@/lib/supabase'
+import type { CompanyWithRelations, Category, Location } from '@/types/database'
 
-export default function Home() {
+interface PageProps {
+  searchParams: Promise<{
+    kategoria?: string
+    miejscowosc?: string
+    szukaj?: string
+  }>
+}
+
+async function getCategories(): Promise<Category[]> {
+  const { data, error } = await supabase
+    .from('categories')
+    .select('*')
+    .order('sort_order')
+
+  if (error) {
+    console.error('Error fetching categories:', error)
+    return []
+  }
+
+  return data || []
+}
+
+async function getLocations(): Promise<Location[]> {
+  const { data, error } = await supabase
+    .from('locations')
+    .select('*')
+    .order('sort_order')
+
+  if (error) {
+    console.error('Error fetching locations:', error)
+    return []
+  }
+
+  return data || []
+}
+
+async function getCompanies(
+  categorySlug?: string,
+  locationSlug?: string,
+  searchQuery?: string
+): Promise<CompanyWithRelations[]> {
+  // Get category ID if filtered
+  let categoryId: string | null = null
+  if (categorySlug) {
+    const { data: category } = await supabase
+      .from('categories')
+      .select('id')
+      .eq('slug', categorySlug)
+      .single()
+    categoryId = category?.id ?? null
+  }
+
+  // Get location ID if filtered
+  let locationId: string | null = null
+  if (locationSlug) {
+    const { data: location } = await supabase
+      .from('locations')
+      .select('id')
+      .eq('slug', locationSlug)
+      .single()
+    locationId = location?.id ?? null
+  }
+
+  // Build query with all filters
+  let query = supabase
+    .from('companies')
+    .select(`
+      *,
+      categories (*),
+      locations (*)
+    `)
+    .order('is_featured', { ascending: false })
+    .order('name')
+
+  if (categoryId) {
+    query = query.eq('category_id', categoryId)
+  }
+
+  if (locationId) {
+    query = query.eq('location_id', locationId)
+  }
+
+  if (searchQuery) {
+    query = query.ilike('name', `%${searchQuery}%`)
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    console.error('Error fetching companies:', error)
+    return []
+  }
+
+  return (data as CompanyWithRelations[]) || []
+}
+
+function FiltersWrapper({
+  categories,
+  locations,
+}: {
+  categories: Category[]
+  locations: Location[]
+}) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <Suspense fallback={<div className="h-20 bg-white border-b border-gray-200" />}>
+      <Filters categories={categories} locations={locations} />
+    </Suspense>
+  )
+}
+
+export default async function HomePage({ searchParams }: PageProps) {
+  const params = await searchParams
+  const [categories, locations, companies] = await Promise.all([
+    getCategories(),
+    getLocations(),
+    getCompanies(params.kategoria, params.miejscowosc, params.szukaj),
+  ])
+
+  return (
+    <>
+      <Hero />
+      <FiltersWrapper categories={categories} locations={locations} />
+
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Results count */}
+        <div className="mb-6">
+          <p className="text-sm text-gray-500">
+            {companies.length === 0
+              ? 'Brak wyników'
+              : companies.length === 1
+              ? '1 firma'
+              : `${companies.length} firm`}
+            {params.szukaj && (
+              <span>
+                {' '}
+                dla &quot;{params.szukaj}&quot;
+              </span>
+            )}
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+
+        <CompanyGrid companies={companies} />
+      </section>
+    </>
+  )
 }
