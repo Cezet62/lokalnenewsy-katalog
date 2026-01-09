@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
 import AdminLayout from '@/components/AdminLayout'
 import { supabaseBrowser } from '@/lib/supabase-browser'
 import type { Event } from '@/types/database'
@@ -41,10 +40,9 @@ const emptyEvent: Partial<Event> = {
 }
 
 export default function AdminEvents() {
-  const searchParams = useSearchParams()
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(searchParams.get('new') === '1')
+  const [showForm, setShowForm] = useState(false)
   const [editingEvent, setEditingEvent] = useState<Partial<Event>>(emptyEvent)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)

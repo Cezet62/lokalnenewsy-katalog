@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
 import AdminLayout from '@/components/AdminLayout'
 import { supabaseBrowser } from '@/lib/supabase-browser'
 import type { Article } from '@/types/database'
@@ -34,10 +33,9 @@ const emptyArticle: Partial<Article> = {
 }
 
 export default function AdminArticles() {
-  const searchParams = useSearchParams()
   const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(searchParams.get('new') === '1')
+  const [showForm, setShowForm] = useState(false)
   const [editingArticle, setEditingArticle] = useState<Partial<Article>>(emptyArticle)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)

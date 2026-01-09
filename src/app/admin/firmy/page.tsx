@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
 import AdminLayout from '@/components/AdminLayout'
 import { supabaseBrowser } from '@/lib/supabase-browser'
 import type { Company, Category, Location } from '@/types/database'
@@ -40,12 +39,11 @@ const emptyCompany: Partial<Company> = {
 }
 
 export default function AdminCompanies() {
-  const searchParams = useSearchParams()
   const [companies, setCompanies] = useState<Company[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [locations, setLocations] = useState<Location[]>([])
   const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(searchParams.get('new') === '1')
+  const [showForm, setShowForm] = useState(false)
   const [editingCompany, setEditingCompany] = useState<Partial<Company>>(emptyCompany)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
