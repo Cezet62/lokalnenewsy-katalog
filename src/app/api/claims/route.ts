@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       .from('companies')
       .select('id, is_claimed')
       .eq('id', company_id)
-      .single()
+      .single<{ id: string; is_claimed: boolean }>()
 
     if (companyError || !company) {
       return NextResponse.json(
