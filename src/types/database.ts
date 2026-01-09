@@ -180,3 +180,26 @@ export type Article = {
   created_at: string
   updated_at: string
 }
+
+// Typ wydarzenia
+export type Event = {
+  id: string
+  title: string
+  slug: string
+  excerpt: string
+  description: string
+  image_url: string | null
+  location: string
+  address: string | null
+  event_date: string
+  event_time_start: string | null
+  event_time_end: string | null
+  organizer: string | null
+  price: string
+  website_url: string | null
+  facebook_url: string | null
+  is_featured: boolean
+  is_published: boolean
+  created_at: string
+  updated_at: string
+}
