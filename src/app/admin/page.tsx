@@ -9,19 +9,21 @@ interface Stats {
   events: number
   companies: number
   classifieds: number
+  subscribers: number
 }
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<Stats>({ articles: 0, events: 0, companies: 0, classifieds: 0 })
+  const [stats, setStats] = useState<Stats>({ articles: 0, events: 0, companies: 0, classifieds: 0, subscribers: 0 })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchStats = async () => {
-      const [articlesRes, eventsRes, companiesRes, classifiedsRes] = await Promise.all([
+      const [articlesRes, eventsRes, companiesRes, classifiedsRes, subscribersRes] = await Promise.all([
         supabaseBrowser.from('articles').select('id', { count: 'exact', head: true }),
         supabaseBrowser.from('events').select('id', { count: 'exact', head: true }),
         supabaseBrowser.from('companies').select('id', { count: 'exact', head: true }),
         supabaseBrowser.from('classifieds').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabaseBrowser.from('subscribers').select('id', { count: 'exact', head: true }).eq('is_active', true),
       ])
 
       setStats({
@@ -29,6 +31,7 @@ export default function AdminDashboard() {
         events: eventsRes.count || 0,
         companies: companiesRes.count || 0,
         classifieds: classifiedsRes.count || 0,
+        subscribers: subscribersRes.count || 0,
       })
       setLoading(false)
     }
@@ -41,6 +44,7 @@ export default function AdminDashboard() {
     { label: 'Wydarzenia', value: stats.events, href: '/admin/wydarzenia', color: 'purple', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
     { label: 'Firmy', value: stats.companies, href: '/admin/firmy', color: 'green', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
     { label: 'Ogłoszenia (nowe)', value: stats.classifieds, href: '/admin/ogloszenia', color: 'yellow', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
+    { label: 'Newsletter', value: stats.subscribers, href: '/admin/subskrybenci', color: 'pink', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
   ]
 
   const colorClasses: Record<string, { bg: string; text: string; iconBg: string }> = {
@@ -48,6 +52,7 @@ export default function AdminDashboard() {
     purple: { bg: 'bg-purple-50', text: 'text-purple-600', iconBg: 'bg-purple-100' },
     green: { bg: 'bg-green-50', text: 'text-green-600', iconBg: 'bg-green-100' },
     yellow: { bg: 'bg-yellow-50', text: 'text-yellow-600', iconBg: 'bg-yellow-100' },
+    pink: { bg: 'bg-pink-50', text: 'text-pink-600', iconBg: 'bg-pink-100' },
   }
 
   return (
@@ -58,7 +63,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
         {statCards.map((card) => {
           const colors = colorClasses[card.color]
           return (
