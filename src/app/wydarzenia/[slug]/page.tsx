@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import type { Event } from '@/types/database'
 import type { Metadata } from 'next'
 import JsonLd from '@/components/JsonLd'
+import { siteConfig } from '@/lib/config'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -34,7 +35,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   return {
-    title: `${event.title} | lokalnenewsy.pl`,
+    title: event.title,
     description: event.excerpt,
     openGraph: {
       title: event.title,
@@ -281,7 +282,7 @@ export default async function EventPage({ params }: PageProps) {
           <h3 className="font-semibold text-gray-900 mb-4">Udostępnij wydarzenie</h3>
           <div className="flex gap-3">
             <a
-              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`https://lokalnenewsy.pl/wydarzenia/${event.slug}`)}`}
+              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(siteConfig.getUrl(`/wydarzenia/${event.slug}`))}`}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"

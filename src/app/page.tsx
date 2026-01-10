@@ -4,6 +4,7 @@ import WeatherWidget from '@/components/WeatherWidget'
 import ArticleCard from '@/components/ArticleCard'
 import CompanyCard from '@/components/CompanyCard'
 import NewsletterForm from '@/components/NewsletterForm'
+import { siteConfig } from '@/lib/config'
 import type { Article, CompanyWithRelations } from '@/types/database'
 
 async function getFeaturedArticle(): Promise<Article | null> {
@@ -200,7 +201,7 @@ export default async function HomePage() {
             <div>
               <h3 className="font-semibold text-gray-900 mb-3">O portalu</h3>
               <p className="text-sm text-gray-600">
-                lokalnenewsy.pl to portal informacyjny gminy Osielsko. Dostarczamy najświeższe
+                {siteConfig.brand} to portal informacyjny gminy {siteConfig.region}. Dostarczamy najświeższe
                 wiadomości, informacje o wydarzeniach i katalog lokalnych firm.
               </p>
             </div>
@@ -210,7 +211,7 @@ export default async function HomePage() {
               <h3 className="font-semibold text-gray-900 mb-3">Kontakt</h3>
               <p className="text-sm text-gray-600">
                 Masz newsa lub chcesz dodać swoją firmę?<br />
-                Napisz do nas: <a href="mailto:kontakt@lokalnenewsy.pl" className="text-blue-600 hover:underline">kontakt@lokalnenewsy.pl</a>
+                Napisz do nas: <a href={`mailto:${siteConfig.email}`} className="text-blue-600 hover:underline">{siteConfig.email}</a>
               </p>
             </div>
 

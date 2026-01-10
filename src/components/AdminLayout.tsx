@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { supabaseBrowser } from '@/lib/supabase-browser'
+import { siteConfig } from '@/lib/config'
 import type { User } from '@supabase/supabase-js'
 
 interface AdminLayoutProps {
@@ -85,9 +86,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           {/* Logo */}
           <div className="p-6 border-b border-gray-800">
             <Link href="/admin" className="text-white font-bold text-lg">
-              lokalnenewsy.pl
+              {siteConfig.region}
             </Link>
-            <p className="text-gray-500 text-sm mt-1">Panel admina</p>
+            <p className="text-gray-500 text-sm mt-1">{siteConfig.brand} • Panel admina</p>
           </div>
 
           {/* Navigation */}

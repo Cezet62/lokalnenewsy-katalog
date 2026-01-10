@@ -1,4 +1,5 @@
 import type { Article, Event, Company } from '@/types/database'
+import { siteConfig } from '@/lib/config'
 
 interface JsonLdProps {
   type: 'website' | 'article' | 'event' | 'localbusiness'
@@ -13,18 +14,18 @@ export default function JsonLd({ type, data }: JsonLdProps) {
       schema = {
         '@context': 'https://schema.org',
         '@type': 'WebSite',
-        name: 'lokalnenewsy.pl',
-        description: 'Portal lokalny gminy Osielsko - aktualności, wydarzenia, firmy, ogłoszenia',
-        url: 'https://lokalnenewsy.pl',
+        name: siteConfig.brand,
+        description: siteConfig.description,
+        url: siteConfig.url,
         potentialAction: {
           '@type': 'SearchAction',
-          target: 'https://lokalnenewsy.pl/firmy?q={search_term_string}',
+          target: `${siteConfig.url}/firmy?q={search_term_string}`,
           'query-input': 'required name=search_term_string',
         },
         publisher: {
           '@type': 'Organization',
-          name: 'lokalnenewsy.pl',
-          url: 'https://lokalnenewsy.pl',
+          name: siteConfig.brand,
+          url: siteConfig.url,
         },
       }
       break
@@ -37,24 +38,24 @@ export default function JsonLd({ type, data }: JsonLdProps) {
         '@type': 'NewsArticle',
         headline: article.title,
         description: article.excerpt,
-        image: article.image_url || 'https://lokalnenewsy.pl/og-image.png',
+        image: article.image_url || siteConfig.getOgImageUrl(),
         datePublished: article.published_at,
         dateModified: article.updated_at,
         author: {
           '@type': 'Organization',
-          name: 'lokalnenewsy.pl',
+          name: siteConfig.brand,
         },
         publisher: {
           '@type': 'Organization',
-          name: 'lokalnenewsy.pl',
+          name: siteConfig.brand,
           logo: {
             '@type': 'ImageObject',
-            url: 'https://lokalnenewsy.pl/logo.png',
+            url: `${siteConfig.url}/logo.png`,
           },
         },
         mainEntityOfPage: {
           '@type': 'WebPage',
-          '@id': `https://lokalnenewsy.pl/aktualnosci/${article.slug}`,
+          '@id': siteConfig.getUrl(`/aktualnosci/${article.slug}`),
         },
       }
       break
@@ -77,12 +78,12 @@ export default function JsonLd({ type, data }: JsonLdProps) {
           address: {
             '@type': 'PostalAddress',
             streetAddress: event.address || event.location,
-            addressLocality: 'Osielsko',
+            addressLocality: siteConfig.region,
             addressRegion: 'kujawsko-pomorskie',
             addressCountry: 'PL',
           },
         },
-        image: event.image_url || 'https://lokalnenewsy.pl/og-image.png',
+        image: event.image_url || siteConfig.getOgImageUrl(),
         organizer: event.organizer
           ? {
               '@type': 'Organization',
@@ -109,17 +110,17 @@ export default function JsonLd({ type, data }: JsonLdProps) {
         '@context': 'https://schema.org',
         '@type': 'LocalBusiness',
         name: company.name,
-        description: company.description || `${company.name} - firma z gminy Osielsko`,
+        description: company.description || `${company.name} - firma z gminy ${siteConfig.region}`,
         image: company.image_url,
         telephone: company.phone,
         address: {
           '@type': 'PostalAddress',
           streetAddress: company.address,
-          addressLocality: 'Osielsko',
+          addressLocality: siteConfig.region,
           addressRegion: 'kujawsko-pomorskie',
           addressCountry: 'PL',
         },
-        url: company.website || `https://lokalnenewsy.pl/firmy/${company.slug}`,
+        url: company.website || siteConfig.getUrl(`/firmy/${company.slug}`),
         openingHours: company.hours || undefined,
         sameAs: [
           company.facebook,

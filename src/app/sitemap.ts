@@ -1,7 +1,8 @@
 import { MetadataRoute } from 'next'
 import { supabase } from '@/lib/supabase'
+import { siteConfig } from '@/lib/config'
 
-const BASE_URL = 'https://lokalnenewsy.pl'
+const BASE_URL = siteConfig.url
 
 type SitemapItem = { slug: string; updated_at: string }
 type SitemapItemWithId = { id: string; updated_at: string }

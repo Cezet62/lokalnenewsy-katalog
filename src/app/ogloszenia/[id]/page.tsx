@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { siteConfig } from '@/lib/config'
 import type { Classified } from '@/types/database'
 import type { Metadata } from 'next'
 
@@ -42,7 +43,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   return {
-    title: `${classified.title} | lokalnenewsy.pl`,
+    title: classified.title,
     description: classified.description.slice(0, 160),
   }
 }
@@ -244,7 +245,7 @@ export default async function ClassifiedPage({ params }: PageProps) {
         {/* Report */}
         <p className="text-center text-sm text-gray-500 mt-6">
           Coś nie tak z tym ogłoszeniem?{' '}
-          <a href="mailto:kontakt@lokalnenewsy.pl" className="text-blue-600 hover:underline">
+          <a href={`mailto:${siteConfig.email}`} className="text-blue-600 hover:underline">
             Zgłoś problem
           </a>
         </p>

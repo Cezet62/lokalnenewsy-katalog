@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   return {
-    title: `${company.name} | lokalnenewsy.pl`,
+    title: company.name,
     description: company.description || `${company.name} - ${company.address}`,
     openGraph: {
       title: company.name,

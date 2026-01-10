@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabaseBrowser } from '@/lib/supabase-browser'
+import { siteConfig } from '@/lib/config'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -36,8 +37,8 @@ export default function LoginPage() {
       <div className="max-w-md w-full">
         <div className="bg-white rounded-xl shadow-lg p-8">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">Panel Administracyjny</h1>
-            <p className="text-gray-600 mt-2">lokalnenewsy.pl</p>
+            <h1 className="text-2xl font-bold text-gray-900">{siteConfig.region}</h1>
+            <p className="text-gray-600 mt-2">{siteConfig.brand} • Panel admina</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">

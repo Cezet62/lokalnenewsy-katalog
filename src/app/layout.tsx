@@ -4,35 +4,31 @@ import './globals.css'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import JsonLd from '@/components/JsonLd'
+import { siteConfig } from '@/lib/config'
 
 const inter = Inter({
   subsets: ['latin', 'latin-ext'],
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://lokalnenewsy.pl'),
+  metadataBase: new URL(siteConfig.url),
   title: {
-    default: 'lokalnenewsy.pl - Portal gminy Osielsko',
-    template: '%s | lokalnenewsy.pl',
+    default: siteConfig.title,
+    template: `%s | ${siteConfig.brand}`,
   },
-  description:
-    'Portal lokalny gminy Osielsko. Aktualności, wydarzenia, katalog firm, ogłoszenia mieszkańców. Bądź na bieżąco z tym, co dzieje się w Osielsku, Niemczu i Żołędowie.',
+  description: siteConfig.description,
   keywords: [
-    'Osielsko',
-    'Niemcz',
-    'Żołędowo',
-    'Jarużyn',
-    'gmina Osielsko',
-    'aktualności Osielsko',
-    'wydarzenia Osielsko',
-    'firmy Osielsko',
-    'ogłoszenia Osielsko',
+    siteConfig.region,
+    `aktualności ${siteConfig.region}`,
+    `wydarzenia ${siteConfig.region}`,
+    `firmy ${siteConfig.region}`,
+    `ogłoszenia ${siteConfig.region}`,
     'portal lokalny',
-    'Bydgoszcz okolice',
+    siteConfig.brand,
   ],
-  authors: [{ name: 'lokalnenewsy.pl' }],
-  creator: 'lokalnenewsy.pl',
-  publisher: 'lokalnenewsy.pl',
+  authors: [{ name: siteConfig.brand }],
+  creator: siteConfig.brand,
+  publisher: siteConfig.brand,
   formatDetection: {
     email: false,
     telephone: false,
@@ -40,24 +36,24 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'pl_PL',
-    url: 'https://lokalnenewsy.pl',
-    siteName: 'lokalnenewsy.pl',
-    title: 'lokalnenewsy.pl - Portal gminy Osielsko',
-    description: 'Aktualności, wydarzenia, firmy i ogłoszenia z gminy Osielsko. Twój lokalny portal informacyjny.',
+    url: siteConfig.url,
+    siteName: siteConfig.brand,
+    title: siteConfig.title,
+    description: siteConfig.description,
     images: [
       {
-        url: '/og-image.png',
+        url: siteConfig.ogImage,
         width: 1200,
         height: 630,
-        alt: 'lokalnenewsy.pl - Portal gminy Osielsko',
+        alt: siteConfig.title,
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'lokalnenewsy.pl - Portal gminy Osielsko',
-    description: 'Aktualności, wydarzenia, firmy i ogłoszenia z gminy Osielsko.',
-    images: ['/og-image.png'],
+    title: siteConfig.title,
+    description: siteConfig.description,
+    images: [siteConfig.ogImage],
   },
   robots: {
     index: true,

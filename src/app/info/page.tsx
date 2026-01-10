@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Informacje praktyczne | lokalnenewsy.pl',
+  title: 'Informacje praktyczne',
   description: 'Ważne telefony, numery alarmowe, harmonogram wywozu śmieci i rozkłady jazdy dla gminy Osielsko.',
 }
 

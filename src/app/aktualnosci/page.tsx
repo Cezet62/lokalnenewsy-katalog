@@ -4,7 +4,7 @@ import type { Article } from '@/types/database'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Aktualności | lokalnenewsy.pl',
+  title: 'Aktualności',
   description: 'Najnowsze wiadomości z gminy Osielsko i okolic.',
 }
 

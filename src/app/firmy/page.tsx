@@ -6,7 +6,7 @@ import type { CompanyWithRelations, Category, Location } from '@/types/database'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Katalog firm | lokalnenewsy.pl',
+  title: 'Katalog firm',
   description: 'Znajdź sprawdzone lokalne usługi i firmy w gminie Osielsko.',
 }
 

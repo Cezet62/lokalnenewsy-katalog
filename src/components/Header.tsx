@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import { siteConfig } from '@/lib/config'
 
 const navItems = [
   { href: '/', label: 'Start' },
@@ -22,10 +23,9 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-1">
-            <span className="text-2xl font-bold text-blue-600">lokalne</span>
-            <span className="text-2xl font-bold text-gray-900">newsy</span>
-            <span className="text-xs text-gray-500 hidden sm:inline ml-1">.pl</span>
+          <Link href="/" className="flex flex-col">
+            <span className="text-2xl font-bold text-gray-900 leading-tight">{siteConfig.region}</span>
+            <span className="text-xs text-gray-500 leading-tight">{siteConfig.brand}</span>
           </Link>
 
           {/* Desktop Navigation */}

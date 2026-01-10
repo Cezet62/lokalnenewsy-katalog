@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import type { Article } from '@/types/database'
 import type { Metadata } from 'next'
 import JsonLd from '@/components/JsonLd'
+import { siteConfig } from '@/lib/config'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -34,7 +35,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   return {
-    title: `${article.title} | lokalnenewsy.pl`,
+    title: article.title,
     description: article.excerpt,
     openGraph: {
       title: article.title,
@@ -146,7 +147,7 @@ export default async function ArticlePage({ params }: PageProps) {
           <h3 className="font-semibold text-gray-900 mb-4">Udostępnij artykuł</h3>
           <div className="flex gap-3">
             <a
-              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`https://lokalnenewsy.pl/aktualnosci/${article.slug}`)}`}
+              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(siteConfig.getUrl(`/aktualnosci/${article.slug}`))}`}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"

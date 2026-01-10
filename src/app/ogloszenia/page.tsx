@@ -5,7 +5,7 @@ import type { Classified } from '@/types/database'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Ogłoszenia | lokalnenewsy.pl',
+  title: 'Ogłoszenia',
   description: 'Lokalne ogłoszenia mieszkańców gminy Osielsko. Sprzedam, kupię, usługi, praca.',
 }
 

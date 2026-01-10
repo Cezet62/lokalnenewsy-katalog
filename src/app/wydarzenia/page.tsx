@@ -4,7 +4,7 @@ import type { Event } from '@/types/database'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Wydarzenia | lokalnenewsy.pl',
+  title: 'Wydarzenia',
   description: 'Kalendarz wydarzeń w gminie Osielsko. Festyny, koncerty, warsztaty i spotkania.',
 }
 
