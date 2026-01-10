@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { resend, emailFrom, adminEmail } from '@/lib/resend'
+import { ClaimNotificationEmail, getClaimNotificationSubject } from '@/emails/ClaimNotificationEmail'
 
 export async function POST(request: Request) {
   try {
@@ -27,11 +29,11 @@ export async function POST(request: Request) {
     // Check if company exists
     const { data: companyData, error: companyError } = await supabase
       .from('companies')
-      .select('id, is_claimed')
+      .select('id, name, is_claimed')
       .eq('id', company_id)
       .single()
 
-    const company = companyData as { id: string; is_claimed: boolean } | null
+    const company = companyData as { id: string; name: string; is_claimed: boolean } | null
 
     if (companyError || !company) {
       return NextResponse.json(
@@ -78,6 +80,27 @@ export async function POST(request: Request) {
         { error: 'Wystąpił błąd podczas zapisywania zgłoszenia' },
         { status: 500 }
       )
+    }
+
+    // Send notification email to admin
+    if (resend) {
+      try {
+        await resend.emails.send({
+          from: emailFrom,
+          to: adminEmail,
+          subject: getClaimNotificationSubject(company.name),
+          html: ClaimNotificationEmail({
+            companyName: company.name,
+            claimantName: name,
+            claimantEmail: email,
+            claimantPhone: phone,
+            message: message,
+          }),
+        })
+      } catch (emailError) {
+        console.error('Error sending claim notification email:', emailError)
+        // Don't fail the request if email fails
+      }
     }
 
     return NextResponse.json({ success: true })

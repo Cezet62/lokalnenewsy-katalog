@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { resend, emailFrom } from '@/lib/resend'
+import { WelcomeEmail, getWelcomeEmailSubject } from '@/emails/WelcomeEmail'
 
 export async function POST(request: Request) {
   try {
@@ -52,6 +54,21 @@ export async function POST(request: Request) {
           )
         }
 
+        // Send welcome email
+        if (resend) {
+          try {
+            await resend.emails.send({
+              from: emailFrom,
+              to: email.toLowerCase(),
+              subject: getWelcomeEmailSubject(),
+              html: WelcomeEmail({ email: email.toLowerCase() }),
+            })
+          } catch (emailError) {
+            console.error('Error sending welcome email:', emailError)
+            // Don't fail the request if email fails
+          }
+        }
+
         return NextResponse.json({
           success: true,
           message: 'Twoja subskrypcja została wznowiona!'
@@ -87,6 +104,21 @@ export async function POST(request: Request) {
         { error: 'Wystąpił błąd podczas zapisu' },
         { status: 500 }
       )
+    }
+
+    // Send welcome email
+    if (resend) {
+      try {
+        await resend.emails.send({
+          from: emailFrom,
+          to: email.toLowerCase(),
+          subject: getWelcomeEmailSubject(),
+          html: WelcomeEmail({ email: email.toLowerCase() }),
+        })
+      } catch (emailError) {
+        console.error('Error sending welcome email:', emailError)
+        // Don't fail the request if email fails
+      }
     }
 
     return NextResponse.json({
