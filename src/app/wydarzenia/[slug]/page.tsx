@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import type { Event } from '@/types/database'
 import type { Metadata } from 'next'
+import JsonLd from '@/components/JsonLd'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -70,13 +71,15 @@ export default async function EventPage({ params }: PageProps) {
   const isPast = new Date(event.event_date) < new Date()
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Back link */}
-        <Link
-          href="/wydarzenia"
-          className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-6"
-        >
+    <>
+      <JsonLd type="event" data={event} />
+      <div className="min-h-screen bg-gray-50 py-8">
+        <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Back link */}
+          <Link
+            href="/wydarzenia"
+            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-6"
+          >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
@@ -292,7 +295,8 @@ export default async function EventPage({ params }: PageProps) {
             </button>
           </div>
         </div>
-      </article>
-    </div>
+        </article>
+      </div>
+    </>
   )
 }

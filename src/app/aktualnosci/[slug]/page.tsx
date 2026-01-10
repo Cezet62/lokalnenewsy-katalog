@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import type { Article } from '@/types/database'
 import type { Metadata } from 'next'
+import JsonLd from '@/components/JsonLd'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -65,9 +66,11 @@ export default async function ArticlePage({ params }: PageProps) {
   })
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Back link */}
+    <>
+      <JsonLd type="article" data={article} />
+      <div className="min-h-screen bg-gray-50 py-8">
+        <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Back link */}
         <Link
           href="/aktualnosci"
           className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-6"
@@ -165,7 +168,8 @@ export default async function ArticlePage({ params }: PageProps) {
             </button>
           </div>
         </div>
-      </article>
-    </div>
+        </article>
+      </div>
+    </>
   )
 }
