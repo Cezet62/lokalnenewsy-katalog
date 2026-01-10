@@ -81,13 +81,26 @@ Portal lokalny dla gminy Osielsko (okolice Bydgoszczy) - "lokalna gazetka online
 - CRUD: Artykuły, Wydarzenia, Firmy, Ogłoszenia
 - Moderacja ogłoszeń (zatwierdź/odrzuć)
 
+### 7. Info praktyczne (/info)
+- Numery alarmowe (112, pogotowie, straż, policja, itd.)
+- Ważne kontakty (Urząd Gminy, służby, szkoły, apteki)
+- Harmonogram wywozu śmieci dla każdej miejscowości
+- Rozkłady jazdy autobusów (linie 91, 92, 93)
+- Przydatne linki
+
+### 8. Newsletter
+- Formularz zapisu na stronie głównej
+- API endpoint /api/newsletter
+- Tabela subscribers w Supabase
+- Obsługa duplikatów i reaktywacji
+
 ---
 
 ## Do zrobienia
 
 ### Priorytet wysoki:
-- [ ] **Info praktyczne** - numery alarmowe, harmonogram śmieci, rozkłady
-- [ ] **Newsletter backend** - zapisywanie maili, integracja z Resend
+- [x] **Info praktyczne** - numery alarmowe, harmonogram śmieci, rozkłady ✅
+- [x] **Newsletter backend** - zapisywanie maili ✅
 
 ### Priorytet średni:
 - [ ] Upload zdjęć do Supabase Storage (zamiast linków)
@@ -113,6 +126,7 @@ Portal lokalny dla gminy Osielsko (okolice Bydgoszczy) - "lokalna gazetka online
 | locations | Miejscowości (Osielsko, Niemcz, Żołędowo...) |
 | claims | Zgłoszenia przejęcia wizytówki |
 | classifieds | Ogłoszenia mieszkańców |
+| subscribers | Subskrybenci newslettera |
 
 **Pliki SQL w repo:**
 - `supabase-setup.sql` - tabele firm
@@ -121,6 +135,7 @@ Portal lokalny dla gminy Osielsko (okolice Bydgoszczy) - "lokalna gazetka online
 - `supabase-events.sql` - wydarzenia
 - `supabase-classifieds.sql` - ogłoszenia
 - `supabase-admin-policies.sql` - polityki RLS dla admina
+- `supabase-newsletter.sql` - subskrybenci newslettera
 
 ---
 
