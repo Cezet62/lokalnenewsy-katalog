@@ -79,6 +79,36 @@ export default function InfoPage() {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* Weather Forecast */}
+        <section className="bg-white rounded-xl border border-gray-200 p-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+            </svg>
+            Prognoza pogody dla Osielska
+          </h2>
+          <div className="bg-gray-50 rounded-lg overflow-hidden">
+            <iframe
+              src="https://www.yr.no/en/content/2-3089881/meteogram.svg"
+              title="Prognoza pogody Osielsko"
+              className="w-full h-[300px] border-0"
+              loading="lazy"
+            />
+          </div>
+          <p className="text-sm text-gray-500 mt-3 flex items-center gap-1">
+            Dane pogodowe z{' '}
+            <a
+              href="https://www.yr.no/en/forecast/daily-table/2-3089881/Poland/Kujawsko-Pomorskie%20Voivodship/Bydgoszcz%20County/Osielsko"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline"
+            >
+              Yr.no
+            </a>
+            {' '}(Norweski Instytut Meteorologiczny)
+          </p>
+        </section>
+
         {/* Emergency Numbers */}
         <section className="bg-red-50 rounded-xl border border-red-200 p-6">
           <h2 className="text-xl font-bold text-red-900 mb-4 flex items-center gap-2">
