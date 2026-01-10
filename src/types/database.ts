@@ -224,3 +224,15 @@ export type Classified = {
   created_at: string
   updated_at: string
 }
+
+// Typ subskrybenta newslettera
+export type Subscriber = {
+  id: string
+  email: string
+  is_active: boolean
+  source: string
+  confirmed_at: string | null
+  unsubscribed_at: string | null
+  created_at: string
+  updated_at: string
+}
