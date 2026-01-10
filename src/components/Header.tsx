@@ -10,6 +10,7 @@ const navItems = [
   { href: '/wydarzenia', label: 'Wydarzenia' },
   { href: '/firmy', label: 'Firmy' },
   { href: '/ogloszenia', label: 'Ogłoszenia' },
+  { href: '/info', label: 'Info' },
 ]
 
 export default function Header() {
