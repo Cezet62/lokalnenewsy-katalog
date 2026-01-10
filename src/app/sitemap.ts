@@ -3,6 +3,9 @@ import { supabase } from '@/lib/supabase'
 
 const BASE_URL = 'https://lokalnenewsy.pl'
 
+type SitemapItem = { slug: string; updated_at: string }
+type SitemapItemWithId = { id: string; updated_at: string }
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
@@ -51,12 +54,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]
 
   // Dynamic pages - Articles
-  const { data: articles } = await supabase
+  const { data: articlesData } = await supabase
     .from('articles')
     .select('slug, updated_at')
     .eq('is_published', true)
 
-  const articlePages: MetadataRoute.Sitemap = (articles || []).map((article) => ({
+  const articles = (articlesData || []) as SitemapItem[]
+  const articlePages: MetadataRoute.Sitemap = articles.map((article) => ({
     url: `${BASE_URL}/aktualnosci/${article.slug}`,
     lastModified: new Date(article.updated_at),
     changeFrequency: 'weekly' as const,
@@ -64,12 +68,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }))
 
   // Dynamic pages - Events
-  const { data: events } = await supabase
+  const { data: eventsData } = await supabase
     .from('events')
     .select('slug, updated_at')
     .eq('is_published', true)
 
-  const eventPages: MetadataRoute.Sitemap = (events || []).map((event) => ({
+  const events = (eventsData || []) as SitemapItem[]
+  const eventPages: MetadataRoute.Sitemap = events.map((event) => ({
     url: `${BASE_URL}/wydarzenia/${event.slug}`,
     lastModified: new Date(event.updated_at),
     changeFrequency: 'weekly' as const,
@@ -77,11 +82,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }))
 
   // Dynamic pages - Companies
-  const { data: companies } = await supabase
+  const { data: companiesData } = await supabase
     .from('companies')
     .select('slug, updated_at')
 
-  const companyPages: MetadataRoute.Sitemap = (companies || []).map((company) => ({
+  const companies = (companiesData || []) as SitemapItem[]
+  const companyPages: MetadataRoute.Sitemap = companies.map((company) => ({
     url: `${BASE_URL}/firmy/${company.slug}`,
     lastModified: new Date(company.updated_at),
     changeFrequency: 'monthly' as const,
@@ -89,12 +95,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }))
 
   // Dynamic pages - Classifieds (only active)
-  const { data: classifieds } = await supabase
+  const { data: classifiedsData } = await supabase
     .from('classifieds')
     .select('id, updated_at')
     .eq('status', 'active')
 
-  const classifiedPages: MetadataRoute.Sitemap = (classifieds || []).map((ad) => ({
+  const classifieds = (classifiedsData || []) as SitemapItemWithId[]
+  const classifiedPages: MetadataRoute.Sitemap = classifieds.map((ad) => ({
     url: `${BASE_URL}/ogloszenia/${ad.id}`,
     lastModified: new Date(ad.updated_at),
     changeFrequency: 'weekly' as const,
