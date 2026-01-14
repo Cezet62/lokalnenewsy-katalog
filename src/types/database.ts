@@ -236,3 +236,28 @@ export type Subscriber = {
   created_at: string
   updated_at: string
 }
+
+// Typ promocji
+export type Promotion = {
+  id: string
+  company_id: string
+  title: string
+  description: string | null
+  image_url: string | null
+  valid_until: string
+  status: 'pending' | 'approved' | 'rejected' | 'expired'
+  contact_email: string
+  contact_phone: string | null
+  created_at: string
+  updated_at: string
+}
+
+// Typ promocji z relacją do firmy
+export type PromotionWithCompany = Promotion & {
+  companies: {
+    id: string
+    name: string
+    slug: string
+    image_url: string
+  } | null
+}
