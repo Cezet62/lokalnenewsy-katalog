@@ -84,7 +84,7 @@ export default async function PromotionsPage() {
               return (
                 <Link
                   key={promotion.id}
-                  href={`/firma/${promotion.companies?.slug}`}
+                  href={`/firmy/${promotion.companies?.slug}`}
                   className="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow"
                 >
                   {/* Image */}

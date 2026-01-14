@@ -3,7 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import ClaimForm from '@/components/ClaimForm'
-import type { CompanyWithRelations } from '@/types/database'
+import type { CompanyWithRelations, Promotion } from '@/types/database'
 import type { Metadata } from 'next'
 
 interface PageProps {
@@ -26,6 +26,25 @@ async function getCompany(slug: string): Promise<CompanyWithRelations | null> {
   }
 
   return data as CompanyWithRelations
+}
+
+async function getCompanyPromotions(companyId: string): Promise<Promotion[]> {
+  const today = new Date().toISOString().split('T')[0]
+
+  const { data, error } = await supabase
+    .from('promotions')
+    .select('*')
+    .eq('company_id', companyId)
+    .eq('status', 'approved')
+    .gte('valid_until', today)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching company promotions:', error)
+    return []
+  }
+
+  return (data as Promotion[]) || []
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -55,11 +74,20 @@ export default async function CompanyPage({ params }: PageProps) {
     notFound()
   }
 
+  const promotions = await getCompanyPromotions(company.id)
+
   const formattedDate = new Date(company.updated_at).toLocaleDateString('pl-PL', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
   })
+
+  const formatPromotionDate = (dateString: string): string => {
+    return new Date(dateString).toLocaleDateString('pl-PL', {
+      day: 'numeric',
+      month: 'long',
+    })
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -239,6 +267,69 @@ export default async function CompanyPage({ params }: PageProps) {
             <p className="text-gray-600 whitespace-pre-line">{company.description}</p>
           </div>
         )}
+
+        {/* Active promotions */}
+        {promotions.length > 0 && (
+          <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Aktualne promocje</h2>
+              <span className="bg-green-100 text-green-700 text-xs font-medium px-2.5 py-1 rounded-full">
+                {promotions.length} {promotions.length === 1 ? 'promocja' : promotions.length < 5 ? 'promocje' : 'promocji'}
+              </span>
+            </div>
+            <div className="space-y-3">
+              {promotions.map((promotion) => (
+                <div
+                  key={promotion.id}
+                  className="flex items-start gap-3 p-3 bg-green-50 rounded-lg border border-green-100"
+                >
+                  <div className="bg-green-500 rounded-full p-1.5 mt-0.5">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-gray-900">{promotion.title}</h3>
+                    {promotion.description && (
+                      <p className="text-sm text-gray-600 mt-1">{promotion.description}</p>
+                    )}
+                    <p className="text-xs text-gray-500 mt-2">
+                      Ważne do {formatPromotionDate(promotion.valid_until)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Add promotion CTA */}
+        <div className="bg-green-50 rounded-xl border border-green-200 p-6 mb-8">
+          <div className="flex items-start gap-4">
+            <div className="bg-green-100 rounded-full p-3">
+              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                Masz promocję do ogłoszenia?
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Dodaj promocję tej firmy i dotrzej do mieszkańców gminy.
+              </p>
+              <Link
+                href={`/promocje/dodaj?firma=${company.id}`}
+                className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Dodaj promocję
+              </Link>
+            </div>
+          </div>
+        </div>
 
         {/* Claim section */}
         {!company.is_claimed && (
