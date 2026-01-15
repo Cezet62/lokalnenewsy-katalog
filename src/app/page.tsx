@@ -1,38 +1,56 @@
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import WeatherWidget from '@/components/WeatherWidget'
-import ArticleCard from '@/components/ArticleCard'
-import CompanyCard from '@/components/CompanyCard'
 import NewsletterForm from '@/components/NewsletterForm'
 import { siteConfig } from '@/lib/config'
-import type { Article, CompanyWithRelations } from '@/types/database'
+import {
+  PromotionBox,
+  NewsBox,
+  EventBox,
+  ClassifiedBox,
+  PlaceholderBox,
+  QuickLinks,
+} from '@/components/home'
+import { generateBentoContent, type BentoContent } from '@/lib/utils/shuffleContent'
+import type { Article, Event, Classified, PromotionWithCompany } from '@/types/database'
 
-async function getFeaturedArticle(): Promise<Article | null> {
+// Force dynamic rendering - content changes frequently
+export const dynamic = 'force-dynamic'
+
+async function getPromotions(): Promise<PromotionWithCompany[]> {
+  const today = new Date().toISOString().split('T')[0]
+
   const { data, error } = await supabase
-    .from('articles')
-    .select('*')
-    .eq('is_published', true)
-    .eq('is_featured', true)
-    .order('published_at', { ascending: false })
-    .limit(1)
-    .single()
+    .from('promotions')
+    .select(`
+      *,
+      companies (
+        id,
+        name,
+        slug,
+        image_url
+      )
+    `)
+    .eq('status', 'approved')
+    .gte('valid_until', today)
+    .order('created_at', { ascending: false })
+    .limit(10)
 
   if (error) {
-    console.error('Error fetching featured article:', error)
-    return null
+    console.error('Error fetching promotions:', error)
+    return []
   }
 
-  return data as Article
+  return (data as PromotionWithCompany[]) || []
 }
 
-async function getLatestArticles(): Promise<Article[]> {
+async function getArticles(): Promise<Article[]> {
   const { data, error } = await supabase
     .from('articles')
     .select('*')
     .eq('is_published', true)
-    .eq('is_featured', false)
     .order('published_at', { ascending: false })
-    .limit(4)
+    .limit(6)
 
   if (error) {
     console.error('Error fetching articles:', error)
@@ -42,141 +60,193 @@ async function getLatestArticles(): Promise<Article[]> {
   return (data as Article[]) || []
 }
 
-async function getFeaturedCompanies(): Promise<CompanyWithRelations[]> {
+async function getEvents(): Promise<Event[]> {
+  const today = new Date().toISOString().split('T')[0]
+
   const { data, error } = await supabase
-    .from('companies')
-    .select(`
-      *,
-      categories (*),
-      locations (*)
-    `)
-    .eq('is_featured', true)
-    .limit(3)
+    .from('events')
+    .select('*')
+    .eq('is_published', true)
+    .gte('event_date', today)
+    .order('event_date', { ascending: true })
+    .limit(4)
 
   if (error) {
-    console.error('Error fetching companies:', error)
+    console.error('Error fetching events:', error)
     return []
   }
 
-  return (data as CompanyWithRelations[]) || []
+  return (data as Event[]) || []
+}
+
+async function getClassifieds(): Promise<Classified[]> {
+  const { data, error } = await supabase
+    .from('classifieds')
+    .select('*')
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .limit(6)
+
+  if (error) {
+    console.error('Error fetching classifieds:', error)
+    return []
+  }
+
+  return (data as Classified[]) || []
+}
+
+// Render a single slot based on content type
+function renderSlot(item: BentoContent | undefined, size: '1x1' | '2x2' = '1x1') {
+  if (!item) {
+    return <PlaceholderBox type="promotion" size={size} />
+  }
+
+  switch (item.type) {
+    case 'promotion':
+      return <PromotionBox promotion={item.data as PromotionWithCompany} size={size} />
+    case 'news':
+      return <NewsBox article={item.data as Article} size={size} />
+    case 'event':
+      return <EventBox event={item.data as Event} size={size} />
+    case 'classified':
+      return <ClassifiedBox classified={item.data as Classified} size={size} />
+    case 'placeholder':
+      const placeholderData = item.data as { placeholderType: 'promotion' | 'classified' | 'event' }
+      return <PlaceholderBox type={placeholderData.placeholderType} size={size} />
+    default:
+      return <PlaceholderBox type="promotion" size={size} />
+  }
 }
 
 export default async function HomePage() {
-  const [featuredArticle, latestArticles, featuredCompanies] = await Promise.all([
-    getFeaturedArticle(),
-    getLatestArticles(),
-    getFeaturedCompanies(),
+  const [promotions, articles, events, classifieds] = await Promise.all([
+    getPromotions(),
+    getArticles(),
+    getEvents(),
+    getClassifieds(),
   ])
+
+  const bentoContent = generateBentoContent({
+    promotions,
+    articles,
+    events,
+    classifieds,
+  })
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <section className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid lg:grid-cols-3 gap-6">
-            {/* Featured Article */}
-            <div className="lg:col-span-2">
-              {featuredArticle ? (
-                <ArticleCard article={featuredArticle} featured />
+      {/* Bento Grid Section */}
+      <section className="py-6 md:py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                Co słychać w gminie?
+              </h1>
+              <p className="text-gray-600 mt-1">
+                Promocje, aktualności, wydarzenia i ogłoszenia z Twojej okolicy
+              </p>
+            </div>
+          </div>
+
+          {/* Main Bento Grid - Fixed Template 4 cols x 3 rows */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[180px]">
+            {/* Row 1-2: Featured (2x2) + 2 slots + Weather */}
+            {/* Slot 0: Featured - spans 2 cols, 2 rows */}
+            <div className="col-span-2 row-span-2">
+              {bentoContent[0] ? (
+                bentoContent[0].type === 'news' ? (
+                  <NewsBox article={bentoContent[0].data as Article} size="2x2" />
+                ) : bentoContent[0].type === 'promotion' ? (
+                  <PromotionBox promotion={bentoContent[0].data as PromotionWithCompany} size="2x2" />
+                ) : (
+                  <PlaceholderBox type="promotion" size="2x2" />
+                )
               ) : (
-                <div className="bg-gray-100 rounded-xl h-64 flex items-center justify-center">
-                  <p className="text-gray-500">Brak wyróżnionego artykułu</p>
-                </div>
+                <PlaceholderBox type="promotion" size="2x2" />
               )}
             </div>
 
-            {/* Sidebar */}
-            <div className="space-y-6">
-              {/* Weather */}
-              <WeatherWidget />
+            {/* Slot 1: Content */}
+            <div className="col-span-1 row-span-1">
+              {renderSlot(bentoContent[1])}
+            </div>
 
-              {/* Quick Links */}
-              <div className="bg-white rounded-xl border border-gray-200 p-4">
-                <h3 className="font-semibold text-gray-900 mb-3">Szybkie linki</h3>
-                <div className="space-y-2">
-                  <a
-                    href="https://www.bip.osielsko.pl"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600"
-                  >
-                    <span>🏛️</span> Urząd Gminy Osielsko
-                  </a>
-                  <a
-                    href="tel:112"
-                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600"
-                  >
-                    <span>🚨</span> Telefon alarmowy: 112
-                  </a>
-                  <Link
-                    href="/firmy"
-                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600"
-                  >
-                    <span>🏢</span> Katalog firm
-                  </Link>
-                </div>
-              </div>
+            {/* Weather Widget - top right */}
+            <div className="col-span-1 row-span-1">
+              <WeatherWidget />
+            </div>
+
+            {/* Slot 2: Content */}
+            <div className="col-span-1 row-span-1">
+              {renderSlot(bentoContent[2])}
+            </div>
+
+            {/* Quick Links */}
+            <div className="col-span-1 row-span-1">
+              <QuickLinks />
+            </div>
+
+            {/* Row 3: 4 regular slots */}
+            <div className="col-span-1 row-span-1">
+              {renderSlot(bentoContent[3])}
+            </div>
+            <div className="col-span-1 row-span-1">
+              {renderSlot(bentoContent[4])}
+            </div>
+            <div className="col-span-1 row-span-1">
+              {renderSlot(bentoContent[5])}
+            </div>
+            <div className="col-span-1 row-span-1">
+              {renderSlot(bentoContent[6])}
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Latest Articles */}
-      <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Najnowsze aktualności</h2>
+          {/* View all links */}
+          <div className="flex flex-wrap gap-4 justify-center mt-8">
+            <Link
+              href="/promocje"
+              className="text-green-600 hover:text-green-700 text-sm font-medium flex items-center gap-1"
+            >
+              Wszystkie promocje
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
             <Link
               href="/aktualnosci"
-              className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+              className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1"
             >
-              Zobacz wszystkie →
+              Wszystkie aktualności
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
             </Link>
-          </div>
-
-          {latestArticles.length > 0 ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {latestArticles.map((article) => (
-                <ArticleCard key={article.id} article={article} />
-              ))}
-            </div>
-          ) : (
-            <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-              <p className="text-gray-500">Brak artykułów do wyświetlenia</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Featured Companies */}
-      <section className="py-12 bg-white border-y border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Polecane firmy</h2>
             <Link
-              href="/firmy"
-              className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+              href="/wydarzenia"
+              className="text-purple-600 hover:text-purple-700 text-sm font-medium flex items-center gap-1"
             >
-              Zobacz katalog →
+              Wszystkie wydarzenia
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+            <Link
+              href="/ogloszenia"
+              className="text-amber-600 hover:text-amber-700 text-sm font-medium flex items-center gap-1"
+            >
+              Wszystkie ogłoszenia
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
             </Link>
           </div>
-
-          {featuredCompanies.length > 0 ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featuredCompanies.map((company) => (
-                <CompanyCard key={company.id} company={company} />
-              ))}
-            </div>
-          ) : (
-            <div className="bg-gray-50 rounded-xl border border-gray-200 p-8 text-center">
-              <p className="text-gray-500">Brak wyróżnionych firm</p>
-            </div>
-          )}
         </div>
       </section>
 
       {/* Newsletter */}
-      <section className="py-12">
+      <section className="py-12 bg-white border-y border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 md:p-12 text-center">
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
@@ -194,7 +264,7 @@ export default async function HomePage() {
       </section>
 
       {/* Info Section */}
-      <section className="py-12 bg-white border-t border-gray-200">
+      <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-3 gap-8">
             {/* About */}

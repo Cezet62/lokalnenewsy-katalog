@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import type { Article } from '@/types/database'
 import type { Metadata } from 'next'
 import JsonLd from '@/components/JsonLd'
+import ShareButtons from '@/components/ShareButtons'
 import { siteConfig } from '@/lib/config'
 
 interface PageProps {
@@ -145,29 +146,10 @@ export default async function ArticlePage({ params }: PageProps) {
         {/* Share */}
         <div className="mt-12 pt-8 border-t border-gray-200">
           <h3 className="font-semibold text-gray-900 mb-4">Udostępnij artykuł</h3>
-          <div className="flex gap-3">
-            <a
-              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(siteConfig.getUrl(`/aktualnosci/${article.slug}`))}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-            >
-              Facebook
-            </a>
-            <button
-              onClick={() => {
-                if (navigator.share) {
-                  navigator.share({
-                    title: article.title,
-                    url: window.location.href,
-                  })
-                }
-              }}
-              className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
-            >
-              Kopiuj link
-            </button>
-          </div>
+          <ShareButtons
+            title={article.title}
+            url={siteConfig.getUrl(`/aktualnosci/${article.slug}`)}
+          />
         </div>
         </article>
       </div>
