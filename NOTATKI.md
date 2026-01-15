@@ -29,10 +29,11 @@ Portal lokalny dla gminy Osielsko (okolice Bydgoszczy) - "lokalna gazetka online
 
 ## Stack technologiczny
 
-- **Frontend:** Next.js 15 (App Router)
+- **Frontend:** Next.js 16 (App Router)
 - **Backend/DB:** Supabase (PostgreSQL + Auth + Storage)
 - **Hosting:** Vercel
 - **Styling:** Tailwind CSS
+- **Email:** Resend (powiadomienia o moderacji)
 
 ### Ważne linki:
 - **Strona:** https://lokalnenewsy-katalog.vercel.app
@@ -94,6 +95,37 @@ Portal lokalny dla gminy Osielsko (okolice Bydgoszczy) - "lokalna gazetka online
 - Tabela subscribers w Supabase
 - Obsługa duplikatów i reaktywacji
 
+### 9. Moduł promocji (/promocje) ✨ NOWE
+- Firmy mogą dodawać promocje do swoich wizytówek
+- Formularz dodawania promocji (tytuł, opis, data ważności, zdjęcie)
+- Moderacja przez admina (zatwierdź/odrzuć)
+- Strona listy wszystkich aktywnych promocji
+- Promocje widoczne na wizytówce firmy
+- Badge "X dni do końca" dla promocji kończących się
+- Powiadomienia email (Resend) o nowych promocjach do moderacji
+- Tabela: `promotions` w Supabase
+- SQL: `supabase-promotions.sql`
+
+### 10. Bento Grid na stronie głównej ✨ NOWE
+- Dynamiczna siatka kafelków 4×3 z mieszanym contentem
+- Typy treści: promocje, aktualności, wydarzenia, ogłoszenia
+- Featured slot 2×2 dla głównego artykułu/promocji
+- Komponenty: PromotionBox, NewsBox, EventBox, ClassifiedBox
+- PlaceholderBox z CTA gdy brak contentu ("Dodaj promocję", "Dodaj ogłoszenie")
+- QuickLinks widget z szybkimi linkami do sekcji
+- Automatyczne mieszanie treści (shuffleContent)
+- Pełne zdjęcia tła z gradient overlay i białym tekstem
+- Zaślepki SVG dla elementów bez zdjęć
+
+### 11. Rozbudowany WeatherWidget ✨ NOWE
+- Aktualna data (dzień tygodnia, dzień miesiąca)
+- Imieniny - pełny kalendarz 366 dni
+- Kliknięcie otwiera popup z:
+  - Szczegółową pogodą
+  - 3-dniową prognozą (temp. max/min)
+  - Imieninami
+- Open-Meteo API z forecast_days=5
+
 ---
 
 ## Do zrobienia
@@ -127,6 +159,7 @@ Portal lokalny dla gminy Osielsko (okolice Bydgoszczy) - "lokalna gazetka online
 | claims | Zgłoszenia przejęcia wizytówki |
 | classifieds | Ogłoszenia mieszkańców |
 | subscribers | Subskrybenci newslettera |
+| promotions | Promocje firm ✨ NOWE |
 
 **Pliki SQL w repo:**
 - `supabase-setup.sql` - tabele firm
@@ -136,6 +169,7 @@ Portal lokalny dla gminy Osielsko (okolice Bydgoszczy) - "lokalna gazetka online
 - `supabase-classifieds.sql` - ogłoszenia
 - `supabase-admin-policies.sql` - polityki RLS dla admina
 - `supabase-newsletter.sql` - subskrybenci newslettera
+- `supabase-promotions.sql` - promocje firm ✨ NOWE
 
 ---
 
@@ -169,4 +203,22 @@ Utworzone w Supabase Auth → Users
 
 ---
 
-*Ostatnia aktualizacja: styczeń 2025*
+---
+
+## Struktura komponentów
+
+### Komponenty strony głównej (src/components/home/)
+- `BentoGrid.tsx` - kontener siatki
+- `PromotionBox.tsx` - kafelek promocji
+- `NewsBox.tsx` - kafelek artykułu
+- `EventBox.tsx` - kafelek wydarzenia
+- `ClassifiedBox.tsx` - kafelek ogłoszenia
+- `PlaceholderBox.tsx` - CTA gdy brak contentu
+- `QuickLinks.tsx` - szybkie linki
+
+### Utilities (src/lib/utils/)
+- `shuffleContent.ts` - logika mieszania treści dla Bento Grid
+
+---
+
+*Ostatnia aktualizacja: 15 stycznia 2025*
