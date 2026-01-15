@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import type { ReactNode } from 'react'
 import { BentoSize } from './BentoGrid'
 
 type PlaceholderType = 'promotion' | 'classified' | 'event'
@@ -16,7 +17,7 @@ const placeholderConfig: Record<PlaceholderType, {
   bgColor: string
   textColor: string
   buttonColor: string
-  icon: JSX.Element
+  icon: ReactNode
 }> = {
   promotion: {
     title: 'Masz firmę w Osielsku?',
