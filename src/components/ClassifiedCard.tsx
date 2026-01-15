@@ -15,6 +15,16 @@ const categoryLabels: Record<string, { label: string; color: string; bg: string 
   inne: { label: 'Inne', color: 'text-gray-700', bg: 'bg-gray-100' },
 }
 
+// Placeholder images for classifieds without photos (Unsplash)
+const placeholderImages: Record<string, string> = {
+  sprzedam: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&q=80',
+  kupie: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=400&q=80',
+  uslugi: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=400&q=80',
+  praca: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&q=80',
+  oddam: 'https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?w=400&q=80',
+  inne: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=400&q=80',
+}
+
 function formatPrice(price: number | null, priceType: string): string {
   if (priceType === 'free') return 'Za darmo'
   if (!price) return 'Do negocjacji'
@@ -45,6 +55,7 @@ function timeAgo(dateString: string): string {
 
 export default function ClassifiedCard({ classified }: ClassifiedCardProps) {
   const category = categoryLabels[classified.category] || categoryLabels.inne
+  const imageUrl = classified.image_url || placeholderImages[classified.category] || placeholderImages.inne
 
   return (
     <Link
@@ -52,23 +63,15 @@ export default function ClassifiedCard({ classified }: ClassifiedCardProps) {
       className="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg hover:border-blue-200 transition-all duration-200 flex flex-col sm:flex-row"
     >
       {/* Image */}
-      {classified.image_url ? (
-        <div className="relative sm:w-48 h-40 sm:h-auto flex-shrink-0 bg-gray-100">
-          <Image
-            src={classified.image_url}
-            alt={classified.title}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-200"
-            sizes="(max-width: 640px) 100vw, 192px"
-          />
-        </div>
-      ) : (
-        <div className="sm:w-48 h-40 sm:h-auto flex-shrink-0 bg-gray-100 flex items-center justify-center">
-          <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-        </div>
-      )}
+      <div className="relative sm:w-48 h-40 sm:h-auto flex-shrink-0 bg-gray-100">
+        <Image
+          src={imageUrl}
+          alt={classified.title}
+          fill
+          className="object-cover group-hover:scale-105 transition-transform duration-200"
+          sizes="(max-width: 640px) 100vw, 192px"
+        />
+      </div>
 
       {/* Content */}
       <div className="flex-1 p-4 flex flex-col">
