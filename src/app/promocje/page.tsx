@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   description: 'Aktualne promocje i oferty specjalne firm z gminy Osielsko. Sprawdź najlepsze okazje!',
 }
 
+// Force dynamic rendering - promotions change frequently
+export const dynamic = 'force-dynamic'
+
 async function getActivePromotions(): Promise<PromotionWithCompany[]> {
   const today = new Date().toISOString().split('T')[0]
 
