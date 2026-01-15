@@ -3,6 +3,9 @@ import EventCard from '@/components/EventCard'
 import type { Event } from '@/types/database'
 import type { Metadata } from 'next'
 
+// Force dynamic rendering - events change frequently
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Wydarzenia',
   description: 'Kalendarz wydarzeń w gminie Osielsko. Festyny, koncerty, warsztaty i spotkania.',
