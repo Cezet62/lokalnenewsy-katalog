@@ -26,10 +26,21 @@ const categoryColors: Record<string, string> = {
   inne: 'bg-gray-500',
 }
 
+// Placeholder images for classifieds without photos (Unsplash)
+const placeholderImages: Record<string, string> = {
+  sprzedam: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&q=80',
+  kupie: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=400&q=80',
+  uslugi: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=400&q=80',
+  praca: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&q=80',
+  oddam: 'https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?w=400&q=80',
+  inne: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=400&q=80',
+}
+
 export default function ClassifiedBox({ classified, size = '1x1' }: ClassifiedBoxProps) {
   const isLarge = size === '2x2' || size === '2x1'
   const categoryLabel = categoryLabels[classified.category] || classified.category
   const categoryColor = categoryColors[classified.category] || 'bg-gray-500'
+  const imageUrl = classified.image_url || placeholderImages[classified.category] || placeholderImages.inne
 
   return (
     <Link
@@ -37,21 +48,13 @@ export default function ClassifiedBox({ classified, size = '1x1' }: ClassifiedBo
       className="group relative h-full rounded-xl overflow-hidden block"
     >
       {/* Background image */}
-      {classified.image_url ? (
-        <Image
-          src={classified.image_url}
-          alt={classified.title}
-          fill
-          className="object-cover group-hover:scale-105 transition-transform duration-300"
-          sizes={isLarge ? '50vw' : '25vw'}
-        />
-      ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center">
-          <svg className="w-16 h-16 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-          </svg>
-        </div>
-      )}
+      <Image
+        src={imageUrl}
+        alt={classified.title}
+        fill
+        className="object-cover group-hover:scale-105 transition-transform duration-300"
+        sizes={isLarge ? '50vw' : '25vw'}
+      />
 
       {/* Dark gradient overlay for text readability */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
